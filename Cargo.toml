@@ -1,0 +1,11 @@
+[package]
+name = "tasklog"
+version = "0.1.0-dev"
+edition = "2021"
+authors = ["Adolfo Fuentes <adolfo_fuentes@outlook.com>"]
+description = "A tiny terminal task tracker that stays out of your way."
+license = "MIT"
+
+[[bin]]
+name = "tasklog"
+path = "src/main.rs"
