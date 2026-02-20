@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
@@ -10,7 +11,16 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Command {
     /// Add a new task to the store.
-    Add { title: String },
+    Add {
+        /// One-line task title.
+        title: String,
+        /// Optional tag to group related tasks (e.g. `work`, `bug`).
+        #[arg(long)]
+        tag: Option<String>,
+        /// Optional due date in YYYY-MM-DD form.
+        #[arg(long)]
+        due: Option<NaiveDate>,
+    },
     /// List open tasks (or all tasks with --all).
     List {
         #[arg(long)]

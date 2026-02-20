@@ -12,8 +12,8 @@ fn main() -> Result<()> {
     let mut store = Store::load_from(&path)?;
 
     match cli.command {
-        Command::Add { title } => {
-            let task = store.add(title);
+        Command::Add { title, tag, due } => {
+            let task = store.add(title, tag, due);
             println!("added #{} {}", task.id, task.title);
         }
         Command::List { all } => {
@@ -26,7 +26,7 @@ fn main() -> Result<()> {
             println!("done #{} {}", task.id, task.title);
         }
         Command::Rm { id } => {
-            store.remove(id);
+            store.remove(id)?;
             println!("removed #{id}");
         }
     }

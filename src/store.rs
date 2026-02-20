@@ -2,6 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Context, Result};
+use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::task::Task;
@@ -40,16 +41,21 @@ impl Store {
         Ok(())
     }
 
-    pub fn add(&mut self, title: String) -> &Task {
+    pub fn add(
+        &mut self,
+        title: String,
+        tag: Option<String>,
+        due: Option<NaiveDate>,
+    ) -> &Task {
         self.next_id += 1;
-        self.tasks.push(Task::new(self.next_id, title));
+        self.tasks.push(Task::new(self.next_id, title, tag, due));
         self.tasks.last().expect("task just pushed")
     }
 
     pub fn list(&self, include_done: bool) -> Vec<&Task> {
         self.tasks
             .iter()
-            .filter(|t| include_done || !t.done)
+            .filter(|t| include_done || !t.is_done())
             .collect()
     }
 
@@ -59,11 +65,18 @@ impl Store {
             .iter_mut()
             .find(|t| t.id == id)
             .ok_or_else(|| anyhow!("no task with id {id}"))?;
-        task.done = true;
+        if task.completed_at.is_none() {
+            task.completed_at = Some(Utc::now());
+        }
         Ok(task)
     }
 
-    pub fn remove(&mut self, id: u64) {
+    pub fn remove(&mut self, id: u64) -> Result<()> {
+        let before = self.tasks.len();
         self.tasks.retain(|t| t.id != id);
+        if self.tasks.len() == before {
+            return Err(anyhow!("no task with id {id}"));
+        }
+        Ok(())
     }
 }
