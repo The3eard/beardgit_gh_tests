@@ -27,6 +27,13 @@ impl Task {
         self.completed_at.is_some()
     }
 
+    pub fn is_overdue(&self, today: NaiveDate) -> bool {
+        match (self.due, self.is_done()) {
+            (Some(due), false) => due < today,
+            _ => false,
+        }
+    }
+
     pub fn format_row(&self) -> String {
         let mark = if self.is_done() { "x" } else { " " };
         let tag = self
