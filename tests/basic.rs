@@ -46,3 +46,23 @@ fn overdue_only_when_open_and_past_due() {
     let all = store.list(true);
     assert!(!all[0].is_overdue(today));
 }
+
+#[test]
+fn done_on_missing_id_returns_error_not_panic() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("tasks.json");
+    let mut store = Store::load_from(&path).unwrap();
+
+    let err = store.mark_done(42).unwrap_err();
+    assert!(err.to_string().contains("no task with id 42"));
+}
+
+#[test]
+fn rm_on_missing_id_returns_error_not_silent_noop() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("tasks.json");
+    let mut store = Store::load_from(&path).unwrap();
+
+    let err = store.remove(99).unwrap_err();
+    assert!(err.to_string().contains("no task with id 99"));
+}
