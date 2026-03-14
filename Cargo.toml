@@ -1,6 +1,6 @@
 [package]
 name = "tasklog"
-version = "0.1.1-dev"
+version = "0.2.0"
 edition = "2021"
 authors = ["Adolfo Fuentes <adolfo_fuentes@outlook.com>"]
 description = "A tiny terminal task tracker that stays out of your way."
