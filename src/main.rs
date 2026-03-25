@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use anyhow::Result;
 use clap::Parser;
 
@@ -8,12 +6,11 @@ use tasklog::store::Store;
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    let path = default_store_path();
-    let mut store = Store::load_from(&path)?;
+    let mut store = Store::load_default()?;
 
     match cli.command {
         Command::Add { title, tag, due } => {
-            let task = store.add(title, tag, due);
+            let task = store.add(title, tag, due)?;
             println!("added #{} {}", task.id, task.title);
         }
         Command::List { all } => {
@@ -33,9 +30,4 @@ fn main() -> Result<()> {
 
     store.save()?;
     Ok(())
-}
-
-fn default_store_path() -> PathBuf {
-    let home = std::env::var_os("HOME").unwrap_or_else(|| ".".into());
-    PathBuf::from(home).join(".tasklog.json")
 }

@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Context, Result};
 use chrono::{NaiveDate, Utc};
+use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
 use crate::task::Task;
@@ -17,12 +18,18 @@ pub struct Store {
 }
 
 impl Store {
+    pub fn load_default() -> Result<Self> {
+        let path = default_store_path()?;
+        Self::load_from(&path)
+    }
+
     pub fn load_from(path: &Path) -> Result<Self> {
         if !path.exists() {
             let mut store = Self::default();
             store.path = path.to_path_buf();
             return Ok(store);
         }
+
         let bytes = fs::read(path)
             .with_context(|| format!("reading task store at {}", path.display()))?;
         let mut store: Self = serde_json::from_slice(&bytes)
@@ -46,10 +53,11 @@ impl Store {
         title: String,
         tag: Option<String>,
         due: Option<NaiveDate>,
-    ) -> &Task {
+    ) -> Result<&Task> {
         self.next_id += 1;
-        self.tasks.push(Task::new(self.next_id, title, tag, due));
-        self.tasks.last().expect("task just pushed")
+        let task = Task::new(self.next_id, title, tag, due);
+        self.tasks.push(task);
+        Ok(self.tasks.last().expect("task just pushed"))
     }
 
     pub fn list(&self, include_done: bool) -> Vec<&Task> {
@@ -79,4 +87,10 @@ impl Store {
         }
         Ok(())
     }
+}
+
+fn default_store_path() -> Result<PathBuf> {
+    let dirs = ProjectDirs::from("dev", "tasklog", "tasklog")
+        .ok_or_else(|| anyhow!("could not determine an OS-appropriate data directory"))?;
+    Ok(dirs.data_dir().join("tasks.json"))
 }
