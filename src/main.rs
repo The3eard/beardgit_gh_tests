@@ -26,6 +26,11 @@ fn main() -> Result<()> {
             store.remove(id)?;
             println!("removed #{id}");
         }
+        Command::Search { query } => {
+            for task in store.search(&query) {
+                println!("{}", task.format_row());
+            }
+        }
     }
 
     store.save()?;

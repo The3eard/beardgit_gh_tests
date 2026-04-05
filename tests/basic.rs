@@ -66,3 +66,17 @@ fn rm_on_missing_id_returns_error_not_silent_noop() {
     let err = store.remove(99).unwrap_err();
     assert!(err.to_string().contains("no task with id 99"));
 }
+
+#[test]
+fn search_is_case_insensitive_and_matches_tag() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("tasks.json");
+    let mut store = Store::load_from(&path).unwrap();
+
+    store.add("Triage parser bug".into(), Some("bug".into()), None).unwrap();
+    store.add("Refactor CLI".into(), Some("chore".into()), None).unwrap();
+
+    assert_eq!(store.search("PARSER").len(), 1);
+    assert_eq!(store.search("bug").len(), 1);
+    assert_eq!(store.search("nonexistent").len(), 0);
+}

@@ -87,6 +87,10 @@ impl Store {
         }
         Ok(())
     }
+
+    pub fn search(&self, query: &str) -> Vec<&Task> {
+        self.tasks.iter().filter(|t| t.matches(query)).collect()
+    }
 }
 
 fn default_store_path() -> Result<PathBuf> {

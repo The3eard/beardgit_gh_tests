@@ -30,4 +30,9 @@ pub enum Command {
     Done { id: u64 },
     /// Remove a task entirely.
     Rm { id: u64 },
+    /// Full-text search across task titles and tags.
+    Search {
+        /// Case-insensitive substring to search for.
+        query: String,
+    },
 }

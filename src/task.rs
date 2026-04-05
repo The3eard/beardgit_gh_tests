@@ -47,4 +47,14 @@ impl Task {
             .unwrap_or_default();
         format!("[{mark}] {:>3}  {}{}{}", self.id, self.title, tag, due)
     }
+
+    pub fn matches(&self, query: &str) -> bool {
+        let needle = query.to_lowercase();
+        self.title.to_lowercase().contains(&needle)
+            || self
+                .tag
+                .as_deref()
+                .map(|t| t.to_lowercase().contains(&needle))
+                .unwrap_or(false)
+    }
 }
