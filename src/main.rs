@@ -13,8 +13,8 @@ fn main() -> Result<()> {
             let task = store.add(title, tag, due)?;
             println!("added #{} {}", task.id, task.title);
         }
-        Command::List { all } => {
-            for task in store.list(all) {
+        Command::List { all, tag } => {
+            for task in store.list(all, tag.as_deref()) {
                 println!("{}", task.format_row());
             }
         }

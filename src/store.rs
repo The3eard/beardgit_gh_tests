@@ -60,10 +60,14 @@ impl Store {
         Ok(self.tasks.last().expect("task just pushed"))
     }
 
-    pub fn list(&self, include_done: bool) -> Vec<&Task> {
+    pub fn list(&self, include_done: bool, tag: Option<&str>) -> Vec<&Task> {
         self.tasks
             .iter()
             .filter(|t| include_done || !t.is_done())
+            .filter(|t| match tag {
+                Some(want) => t.tag.as_deref() == Some(want),
+                None => true,
+            })
             .collect()
     }
 

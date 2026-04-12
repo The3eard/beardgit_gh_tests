@@ -23,13 +23,23 @@ pub enum Command {
     },
     /// List open tasks (or all tasks with --all).
     List {
+        /// Include completed tasks in the output.
         #[arg(long)]
         all: bool,
+        /// Filter by tag.
+        #[arg(long)]
+        tag: Option<String>,
     },
     /// Mark a task as done.
-    Done { id: u64 },
+    Done {
+        /// Task ID to complete.
+        id: u64,
+    },
     /// Remove a task entirely.
-    Rm { id: u64 },
+    Rm {
+        /// Task ID to remove.
+        id: u64,
+    },
     /// Full-text search across task titles and tags.
     Search {
         /// Case-insensitive substring to search for.
