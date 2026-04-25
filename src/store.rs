@@ -6,6 +6,7 @@ use chrono::{NaiveDate, Utc};
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
+use crate::recurrence::Recurrence;
 use crate::task::Task;
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -54,9 +55,10 @@ impl Store {
         title: String,
         tag: Option<String>,
         due: Option<NaiveDate>,
+        repeat: Option<Recurrence>,
     ) -> Result<&Task> {
         self.next_id += 1;
-        let task = Task::new(self.next_id, title, tag, due);
+        let task = Task::new(self.next_id, title, tag, due).with_repeat(repeat);
         self.tasks.push(task);
         Ok(self.tasks.last().expect("task just pushed"))
     }
@@ -72,7 +74,8 @@ impl Store {
             .collect()
     }
 
-    pub fn mark_done(&mut self, id: u64) -> Result<&Task> {
+    pub fn mark_done(&mut self, id: u64) -> Result<MarkDoneOutcome<'_>> {
+        let next_id_seed = self.next_id;
         let task = self
             .tasks
             .iter_mut()
@@ -81,7 +84,18 @@ impl Store {
         if task.completed_at.is_none() {
             task.completed_at = Some(Utc::now());
         }
-        Ok(task)
+        let rolled = match (task.repeat, task.due) {
+            (Some(rule), Some(due)) => Some(Task::new(next_id_seed + 1, task.title.clone(), task.tag.clone(), Some(rule.next_after(due))).with_repeat(Some(rule))),
+            _ => None,
+        };
+        // Push the rolled-over occurrence (if any) and return both the just-completed task and the new id.
+        if let Some(next) = rolled {
+            self.next_id += 1;
+            self.tasks.push(next);
+        }
+        let completed = self.tasks.iter().find(|t| t.id == id).expect("completed task still present");
+        let new_id = if rolled_some(self) { Some(self.next_id) } else { None };
+        Ok(MarkDoneOutcome { completed, rolled_id: new_id })
     }
 
     pub fn remove(&mut self, id: u64) -> Result<()> {
@@ -102,4 +116,13 @@ fn default_store_path() -> Result<PathBuf> {
     let dirs = ProjectDirs::from("dev", "tasklog", "tasklog")
         .ok_or_else(|| anyhow!("could not determine an OS-appropriate data directory"))?;
     Ok(dirs.data_dir().join("tasks.json"))
+}
+
+fn rolled_some(store: &Store) -> bool {
+    matches!(store.tasks.last(), Some(t) if t.repeat.is_some() && t.completed_at.is_none())
+}
+
+pub struct MarkDoneOutcome<'a> {
+    pub completed: &'a Task,
+    pub rolled_id: Option<u64>,
 }

@@ -9,8 +9,8 @@ fn main() -> Result<()> {
     let mut store = Store::load_default()?;
 
     match cli.command {
-        Command::Add { title, tag, due } => {
-            let task = store.add(title, tag, due)?;
+        Command::Add { title, tag, due, repeat } => {
+            let task = store.add(title, tag, due, repeat)?;
             println!("added #{} {}", task.id, task.title);
         }
         Command::List { all, tag } => {
@@ -19,8 +19,11 @@ fn main() -> Result<()> {
             }
         }
         Command::Done { id } => {
-            let task = store.mark_done(id)?;
-            println!("done #{} {}", task.id, task.title);
+            let outcome = store.mark_done(id)?;
+            println!("done #{} {}", outcome.completed.id, outcome.completed.title);
+            if let Some(next) = outcome.rolled_id {
+                println!("rolled to #{next}");
+            }
         }
         Command::Rm { id } => {
             store.remove(id)?;
