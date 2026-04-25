@@ -1,0 +1,47 @@
+image: rust:1.79
+
+stages:
+  - lint
+  - test
+  - build
+
+variables:
+  CARGO_HOME: "$CI_PROJECT_DIR/.cargo"
+
+cache:
+  key:
+    files:
+      - Cargo.toml
+  paths:
+    - .cargo/
+    - target/
+
+before_script:
+  - rustc --version
+  - cargo --version
+
+fmt:
+  stage: lint
+  script:
+    - rustup component add rustfmt
+    - cargo fmt --all -- --check
+
+clippy:
+  stage: lint
+  script:
+    - rustup component add clippy
+    - cargo clippy --all-targets --all-features -- -D warnings
+
+test:
+  stage: test
+  script:
+    - cargo test --verbose
+
+build:
+  stage: build
+  script:
+    - cargo build --release --verbose
+  artifacts:
+    paths:
+      - target/release/tasklog
+    expire_in: 1 week
