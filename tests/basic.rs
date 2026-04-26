@@ -86,3 +86,33 @@ fn search_is_case_insensitive_and_matches_tag() {
     assert_eq!(store.search("bug").len(), 1);
     assert_eq!(store.search("nonexistent").len(), 0);
 }
+
+#[test]
+fn marking_recurring_done_spawns_next_occurrence() {
+    use chrono::NaiveDate;
+    use tasklog::recurrence::Recurrence;
+
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("tasks.json");
+    let mut store = Store::load_from(&path).unwrap();
+
+    let due = NaiveDate::from_ymd_opt(2026, 5, 1).unwrap();
+    store
+        .add(
+            "Pay rent".into(),
+            Some("home".into()),
+            Some(due),
+            Some(Recurrence::Monthly),
+        )
+        .unwrap();
+
+    let outcome = store.mark_done(1).unwrap();
+    assert_eq!(outcome.completed.id, 1);
+    let next_id = outcome.rolled_id.expect("monthly recurrence rolls over");
+
+    let all = store.list(true, None);
+    let next = all.iter().find(|t| t.id == next_id).unwrap();
+    assert_eq!(next.title, "Pay rent");
+    assert_eq!(next.due, NaiveDate::from_ymd_opt(2026, 6, 1));
+    assert!(!next.is_done());
+}
