@@ -45,4 +45,6 @@ pub enum Command {
         /// Case-insensitive substring to search for.
         query: String,
     },
+    /// Launch the interactive TUI dashboard (prototype).
+    Tui,
 }

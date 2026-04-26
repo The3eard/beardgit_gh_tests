@@ -3,6 +3,7 @@ use clap::Parser;
 
 use tasklog::cli::{Cli, Command};
 use tasklog::store::Store;
+use tasklog::tui;
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -30,6 +31,10 @@ fn main() -> Result<()> {
             for task in store.search(&query) {
                 println!("{}", task.format_row());
             }
+        }
+        Command::Tui => {
+            tui::run()?;
+            return Ok(());
         }
     }
 
