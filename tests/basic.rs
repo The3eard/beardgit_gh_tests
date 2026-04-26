@@ -86,3 +86,16 @@ fn search_is_case_insensitive_and_matches_tag() {
     assert_eq!(store.search("bug").len(), 1);
     assert_eq!(store.search("nonexistent").len(), 0);
 }
+
+#[test]
+fn add_rejects_empty_or_whitespace_title() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("tasks.json");
+    let mut store = Store::load_from(&path).unwrap();
+
+    assert!(store.add("".into(), None, None).is_err());
+    assert!(store.add("   \t".into(), None, None).is_err());
+    // Surrounding whitespace is trimmed but the task is accepted.
+    let task = store.add("  buy milk ".into(), None, None).unwrap();
+    assert_eq!(task.title, "buy milk");
+}
