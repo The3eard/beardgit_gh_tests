@@ -56,7 +56,8 @@ Tasks are stored at:
 
 Stable enough for daily use; see [CHANGELOG.md](CHANGELOG.md) for what landed
 when. The TUI dashboard (`tasklog tui`) is in active development on
-`feat/tui-dashboard`.
+`feat/tui-dashboard`. Once the branch lands, `tasklog tui` will be the
+recommended way to triage your open list.
 
 ## Contributing
 
