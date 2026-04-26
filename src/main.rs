@@ -9,7 +9,12 @@ fn main() -> Result<()> {
     let mut store = Store::load_default()?;
 
     match cli.command {
-        Command::Add { title, tag, due, repeat } => {
+        Command::Add {
+            title,
+            tag,
+            due,
+            repeat,
+        } => {
             let task = store.add(title, tag, due, repeat)?;
             println!("added #{} {}", task.id, task.title);
         }

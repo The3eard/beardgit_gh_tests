@@ -85,7 +85,15 @@ impl Store {
             task.completed_at = Some(Utc::now());
         }
         let rolled = match (task.repeat, task.due) {
-            (Some(rule), Some(due)) => Some(Task::new(next_id_seed + 1, task.title.clone(), task.tag.clone(), Some(rule.next_after(due))).with_repeat(Some(rule))),
+            (Some(rule), Some(due)) => Some(
+                Task::new(
+                    next_id_seed + 1,
+                    task.title.clone(),
+                    task.tag.clone(),
+                    Some(rule.next_after(due)),
+                )
+                .with_repeat(Some(rule)),
+            ),
             _ => None,
         };
         // Push the rolled-over occurrence (if any) and return both the just-completed task and the new id.
@@ -93,9 +101,20 @@ impl Store {
             self.next_id += 1;
             self.tasks.push(next);
         }
-        let completed = self.tasks.iter().find(|t| t.id == id).expect("completed task still present");
-        let new_id = if rolled_some(self) { Some(self.next_id) } else { None };
-        Ok(MarkDoneOutcome { completed, rolled_id: new_id })
+        let completed = self
+            .tasks
+            .iter()
+            .find(|t| t.id == id)
+            .expect("completed task still present");
+        let new_id = if rolled_some(self) {
+            Some(self.next_id)
+        } else {
+            None
+        };
+        Ok(MarkDoneOutcome {
+            completed,
+            rolled_id: new_id,
+        })
     }
 
     pub fn remove(&mut self, id: u64) -> Result<()> {
@@ -122,6 +141,7 @@ fn rolled_some(store: &Store) -> bool {
     matches!(store.tasks.last(), Some(t) if t.repeat.is_some() && t.completed_at.is_none())
 }
 
+#[derive(Debug)]
 pub struct MarkDoneOutcome<'a> {
     pub completed: &'a Task,
     pub rolled_id: Option<u64>,
