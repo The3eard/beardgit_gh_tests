@@ -6,7 +6,9 @@ fn add_then_list_returns_open_task() {
     let path = dir.path().join("tasks.json");
     let mut store = Store::load_from(&path).unwrap();
 
-    store.add("Write the changelog".into(), Some("docs".into()), None);
+    store
+        .add("Write the changelog".into(), Some("docs".into()), None)
+        .unwrap();
 
     let open = store.list(false, None);
     assert_eq!(open.len(), 1);
@@ -21,7 +23,7 @@ fn done_then_default_list_hides_completed() {
     let path = dir.path().join("tasks.json");
     let mut store = Store::load_from(&path).unwrap();
 
-    store.add("Pick up groceries".into(), None, None);
+    store.add("Pick up groceries".into(), None, None).unwrap();
     store.mark_done(1).unwrap();
 
     assert!(store.list(false, None).is_empty());
@@ -38,7 +40,7 @@ fn overdue_only_when_open_and_past_due() {
     let past = NaiveDate::from_ymd_opt(2026, 1, 1).unwrap();
     let today = NaiveDate::from_ymd_opt(2026, 4, 27).unwrap();
 
-    store.add("Old task".into(), None, Some(past));
+    store.add("Old task".into(), None, Some(past)).unwrap();
     let open = store.list(false, None);
     assert!(open[0].is_overdue(today));
 
@@ -73,8 +75,12 @@ fn search_is_case_insensitive_and_matches_tag() {
     let path = dir.path().join("tasks.json");
     let mut store = Store::load_from(&path).unwrap();
 
-    store.add("Triage parser bug".into(), Some("bug".into()), None).unwrap();
-    store.add("Refactor CLI".into(), Some("chore".into()), None).unwrap();
+    store
+        .add("Triage parser bug".into(), Some("bug".into()), None)
+        .unwrap();
+    store
+        .add("Refactor CLI".into(), Some("chore".into()), None)
+        .unwrap();
 
     assert_eq!(store.search("PARSER").len(), 1);
     assert_eq!(store.search("bug").len(), 1);

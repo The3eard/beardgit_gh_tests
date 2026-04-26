@@ -25,13 +25,14 @@ impl Store {
 
     pub fn load_from(path: &Path) -> Result<Self> {
         if !path.exists() {
-            let mut store = Self::default();
-            store.path = path.to_path_buf();
-            return Ok(store);
+            return Ok(Self {
+                path: path.to_path_buf(),
+                ..Self::default()
+            });
         }
 
-        let bytes = fs::read(path)
-            .with_context(|| format!("reading task store at {}", path.display()))?;
+        let bytes =
+            fs::read(path).with_context(|| format!("reading task store at {}", path.display()))?;
         let mut store: Self = serde_json::from_slice(&bytes)
             .with_context(|| format!("parsing task store at {}", path.display()))?;
         store.path = path.to_path_buf();

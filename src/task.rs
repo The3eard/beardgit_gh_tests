@@ -41,10 +41,7 @@ impl Task {
             .as_deref()
             .map(|t| format!(" #{t}"))
             .unwrap_or_default();
-        let due = self
-            .due
-            .map(|d| format!(" (due {d})"))
-            .unwrap_or_default();
+        let due = self.due.map(|d| format!(" (due {d})")).unwrap_or_default();
         format!("[{mark}] {:>3}  {}{}{}", self.id, self.title, tag, due)
     }
 
