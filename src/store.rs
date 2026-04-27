@@ -55,8 +55,12 @@ impl Store {
         tag: Option<String>,
         due: Option<NaiveDate>,
     ) -> Result<&Task> {
+        let trimmed = title.trim();
+        if trimmed.is_empty() {
+            return Err(anyhow!("task title must be non-empty"));
+        }
         self.next_id += 1;
-        let task = Task::new(self.next_id, title, tag, due);
+        let task = Task::new(self.next_id, trimmed.to_owned(), tag, due);
         self.tasks.push(task);
         Ok(self.tasks.last().expect("task just pushed"))
     }
