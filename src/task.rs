@@ -1,6 +1,8 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
+use crate::recurrence::Recurrence;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Task {
     pub id: u64,
@@ -9,6 +11,8 @@ pub struct Task {
     pub due: Option<NaiveDate>,
     pub created_at: DateTime<Utc>,
     pub completed_at: Option<DateTime<Utc>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub repeat: Option<Recurrence>,
 }
 
 impl Task {
@@ -20,7 +24,13 @@ impl Task {
             due,
             created_at: Utc::now(),
             completed_at: None,
+            repeat: None,
         }
+    }
+
+    pub fn with_repeat(mut self, repeat: Option<Recurrence>) -> Self {
+        self.repeat = repeat;
+        self
     }
 
     pub fn is_done(&self) -> bool {

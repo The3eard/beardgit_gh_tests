@@ -1,6 +1,8 @@
 use chrono::NaiveDate;
 use clap::{Parser, Subcommand};
 
+use crate::recurrence::Recurrence;
+
 #[derive(Debug, Parser)]
 #[command(name = "tasklog", version, about = "A tiny terminal task tracker.")]
 pub struct Cli {
@@ -20,6 +22,9 @@ pub enum Command {
         /// Optional due date in YYYY-MM-DD form.
         #[arg(long)]
         due: Option<NaiveDate>,
+        /// Optional recurrence: daily, weekly, or monthly.
+        #[arg(long, value_parser = clap::value_parser!(Recurrence))]
+        repeat: Option<Recurrence>,
     },
     /// List open tasks (or all tasks with --all).
     List {
